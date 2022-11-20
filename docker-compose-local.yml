@@ -1,0 +1,24 @@
+version: '3.3'
+
+networks:
+  camel-net:
+    name: custom-net
+
+services:
+ 
+  amq:
+    image: rmohr/activemq:5.15.9
+    container_name: activemq
+    ports:
+      - 8161:8161
+      - 61616:61616
+    networks:
+      - camel-net
+      
+  mailcatcher:
+    image: tophfr/mailcatcher
+    ports:
+      - "1025:25"
+      - "1080:80"
+    networks:
+      - camel-net

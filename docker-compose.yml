@@ -1,0 +1,88 @@
+version: '3.3'
+
+volumes: 
+  box-tempsensor:
+  box-tempmonitor:
+  box-notifier:
+
+networks:
+  camel-net:
+    name: custom-net
+
+services:
+ 
+  tempmonitor:
+    build:
+      context: ./tempmonitor
+    command: bash start-tempmonitor.sh
+    ports:
+      - "8080:8080"
+    environment:
+      GRADLE_USER_HOME: /box-tempmonitor
+      SPRING_PROFILES_ACTIVE: prod
+    volumes:
+      - .:/tempmonitor
+      - box-tempmonitor:/box-tempmonitor
+    depends_on:
+      - amq
+    networks:
+      - camel-net
+      
+  tempsensor:
+    build:
+      context: ./tempsensor
+    command: bash start-tempsensor.sh
+    ports:
+      - "8081:8081"
+    environment:
+      GRADLE_USER_HOME: /box-tempsensor
+      SPRING_PROFILES_ACTIVE: prod
+    volumes:
+      - .:/tempsensor
+      - box-tempsensor:/box-tempsensor
+    depends_on:
+      - amq
+    networks:
+      - camel-net
+  
+  notifier:
+    build:
+      context: ./notifier
+    command: bash start-notifier.sh
+    ports:
+      - "8082:8082"
+    environment:
+      GRADLE_USER_HOME: /box-notifier
+      SPRING_PROFILES_ACTIVE: prod
+    volumes:
+      - .:/notifier
+      - box-notifier:/box-notifier
+    depends_on:
+      - amq
+      - mailcatcher
+    networks:
+      - camel-net
+
+  box:
+    image: busybox
+    volumes:
+      - /box
+    networks:
+      - camel-net
+  
+  amq:
+    image: rmohr/activemq:5.15.9
+    container_name: activemq
+    ports:
+      - 8161:8161
+      - 61616:61616
+    networks:
+      - camel-net
+      
+  mailcatcher:
+    image: tophfr/mailcatcher
+    ports:
+      - "1025:25"
+      - "1080:80"
+    networks:
+      - camel-net

@@ -1,0 +1,31 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '2.7.5'
+	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+}
+
+group = 'br.com.camel'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+repositories {
+	mavenCentral()
+}
+
+ext{
+	camelVersion = '3.19.0'
+}
+
+dependencies {
+	implementation "org.apache.camel.springboot:camel-spring-boot-starter:${camelVersion}"
+	implementation "org.apache.camel.springboot:camel-activemq-starter:${camelVersion}"
+	implementation "org.apache.camel.springboot:camel-jackson-starter:${camelVersion}"
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.0'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
