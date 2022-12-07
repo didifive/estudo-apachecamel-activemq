@@ -16,18 +16,21 @@ public class NotifierRoute extends RouteBuilder {
     @Autowired
     TempNotificationProcessor tempNotificationProcessor;
 
+    @Autowired
+    HighTempAlertProcessor highTempAlertProcessor;
+
     @Override
     public void configure() throws Exception {
         from("activemq:temp-notify?jmsMessageType=Text")
                 .routeId("route.temp.notify")
                 .unmarshal(new ListJacksonDataFormat(TempSensor.class))
-                .process(new TempNotificationProcessor())
+                .process(tempNotificationProcessor)
                 .log("Notificação de temperaturas enviada em: " + OffsetDateTime.now());
 
         from("activemq:high-temp-notify?jmsMessageType=Text")
                 .routeId("route.high.temp.notify")
                 .unmarshal(new ListJacksonDataFormat(TempSensor.class))
-                .process(new HighTempAlertProcessor())
+                .process(highTempAlertProcessor)
                 .log("ALERTA de temperaturas altas enviada em: " + OffsetDateTime.now());
     }
 }

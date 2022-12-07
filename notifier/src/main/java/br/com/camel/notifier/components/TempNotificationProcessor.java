@@ -3,6 +3,8 @@ package br.com.camel.notifier.components;
 import br.com.camel.notifier.models.TempSensor;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -10,10 +12,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static br.com.camel.notifier.components.SendEMail.sendEMail;
-
 @Component
 public class TempNotificationProcessor implements Processor {
+
+    @Autowired
+    private EMailService eMailService;
 
     @Override
     public void process(Exchange exchange) throws Exception {
@@ -53,12 +56,12 @@ public class TempNotificationProcessor implements Processor {
                 , maxTimestamp.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))
                 , averageTemp, maxTemp, minTemp);
         message += tempList.stream()
-                        .map(temp ->
-                            String.format("Dispositivo: %s - Temperatura: %sºC - Timestamp: %s %n"
+                .map(temp ->
+                        String.format("Dispositivo: %s - Temperatura: %sºC - Timestamp: %s %n"
                                 , temp.deviceName(), temp.temp(), temp.timestamp()))
-                        .collect(Collectors.joining());
+                .collect(Collectors.joining());
 
-        sendEMail("Notificação de temperatura", message);
+        eMailService.send("Notificação de temperatura", message);
 
     }
 }
